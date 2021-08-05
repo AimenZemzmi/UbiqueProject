@@ -1,65 +1,48 @@
-
 import './App.css';
-import { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { useQuery } from "react-query";
-
 const axios = require('axios');
 
 function App() {
-  const { register, handleSubmit } = useForm();
-  const onSubmit = submitData => {
-    if (users !== undefined) {
-      users.forEach(element => {
-        if(element.id === parseInt(submitData.userInfo)){
-          console.log(submitData, element);
-        }
-      });
-    } else {
-      console.log(submitData);
-    }
-  };
-  const [users, setUsers] = useState([]);
-  
-  let resUsers = [];
-  const { isLoading, error, isFetching } = useQuery("req", () => {
-    axios.get('https://jsonplaceholder.typicode.com/users').then(function (res) {
-      resUsers = res.data;
-    }).catch(function (error) {
-      console.log(error);
-    }).then(function () {
-      setUsers(resUsers);
-    });
-  });
+    const { register, handleSubmit } = useForm();
+    const onSubmit = submitData => {
+        if (data !== undefined && submitData.user !== 0) {
+            data.forEach(user => {
+                if(user.id === submitData.user){
+                    console.log(submitData, user);
+                }
+            });
+        } else
+            console.log(submitData);
+    };
 
-  if (isLoading)
-    console.log('Loading');
+    const fetchUsers = async () => {
+        const result = await axios('https://jsonplaceholder.typicode.com/users')
+        return result.data
+    };
 
-  if (error)
-    console.log('Error: ' + error.message);
+    const { isLoading, error, data } = useQuery('fetchUsers', fetchUsers);
 
-  return (
-    <div className="App">
-      <form onSubmit={handleSubmit(onSubmit)} className="form">
+    if (error)
+        console.log('Error: ' + error.message);
 
-        {
-          !isFetching && (users !== []) ?
-            <select {...register("userInfo")}>
-              {
-                users.map(userInfo => (
-                  <option key={userInfo.id} value={userInfo.id}>{userInfo.name}</option>
-                ))
-              }
-            </select>
-            :
-            <div>Updating...</div>
-        }
-        
-        <input type="submit" />
-
-      </form>
-    </div>
-  );
+    return (
+        <div className="App">
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <select {...register("user", { valueAsNumber: true, setValueAs: v => parseInt(v) })}>
+                    <option value="0" defaultValue={0}>...</option>
+                    {
+                        !isLoading && 
+                            data.map((userInfo, key) => (
+                                <option key={userInfo.id} value={userInfo.id}>{userInfo.name}</option>
+                            ))
+                    }
+                </select>
+                <input type="submit" />
+                {error && <div>ERROR</div>}
+            </form>
+        </div>
+      );
 }
 
 export default App;

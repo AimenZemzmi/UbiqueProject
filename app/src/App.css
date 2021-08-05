@@ -30,7 +30,7 @@
   color: #61dafb;
 }
 
-.form {
+.App > form {
   width: 100%;
   position: absolute;
   top: 50%;
